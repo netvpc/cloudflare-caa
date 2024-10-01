@@ -5,6 +5,18 @@ API_TOKEN=""
 ZONE_ID=""
 DOMAIN=""
 
+# # 기존 CAA 레코드 가져오기 및 삭제
+# EXISTING_RECORDS=$(curl -X GET "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?type=CAA" \
+#   -H "Authorization: Bearer ${API_TOKEN}" \
+#   -H "Content-Type: application/json" | jq -r '.result[] | .id')
+
+# for record_id in $EXISTING_RECORDS; do
+#   echo "Deleting existing CAA record with ID: $record_id"
+#   curl -X DELETE "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${record_id}" \
+#     -H "Authorization: Bearer ${API_TOKEN}" \
+#     -H "Content-Type: application/json"
+# done
+
 # CAA 레코드 데이터 배열
 declare -a caa_records=(
   '0 issue amazonaws.com; cansignhttpexchanges=yes'
@@ -29,7 +41,7 @@ for record in "${caa_records[@]}"; do
     --arg name "$DOMAIN" \
     --arg tag "$tag" \
     --arg value "$value" \
-    --argjson ttl 3600 \
+    --argjson ttl 0 \
     --argjson flag $flag \
     '{type: $type, name: $name, ttl: $ttl, data: {flags: $flag, tag: $tag, value: $value}}')
 
